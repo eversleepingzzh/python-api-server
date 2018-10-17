@@ -19,12 +19,10 @@ class User(Mongua):
         hash2 = sha256(hash1 + salt)
         return hash2
 
-
     def from_form(self, form):
         self.id = form.get('id', None)
         self.username = form.get('username', '')
         self.password = form.get('password', '')
-
 
     @classmethod
     def register(cls, form):
@@ -43,7 +41,6 @@ class User(Mongua):
         u = User()
         u.from_form(form)
         user = User.find_by(username=u.username)
-        print(user.__dict__)
         if user is not None and user.password == u.salted_password(u.password):
             return user
         else:

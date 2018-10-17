@@ -2,6 +2,7 @@ import time
 from pymongo import MongoClient
 mongua = MongoClient()
 
+
 def next_id(name):
     query = {
         'name': name,
@@ -22,6 +23,7 @@ def next_id(name):
     # find_and_modify 是一个原子操作函数
     new_id = doc.find_and_modify(**kwargs).get('seq')
     return new_id
+
 
 class Mongua(object):
     __fields__ = [
@@ -59,6 +61,30 @@ class Mongua(object):
             return l[0]
         else:
             return None
+
+    @classmethod
+    def has(cls, **kwargs):
+        return cls.find_one(**kwargs) is not None
+
+    @classmethod
+    def all(cls):
+        return cls._find()
+
+    @classmethod
+    def upsert(cls, query_form, update_form, hard=False):
+        ms = cls.find_one(**query_form)
+        if ms is None:
+            query_form.update(**update_form)
+            ms = cls.new(query_form)
+        else:
+            ms.update(update_form, hard=hard)
+        return ms
+
+    def update(self, form, hard=False):
+        for k, v in form.items():
+            if hard or hasattr(self, k):
+                setattr(self, k, v)
+        self.save()
 
     @classmethod
     def _find(cls, **kwargs):
@@ -136,6 +162,15 @@ class Mongua(object):
         return m
 
     def save(self):
-        print('save')
         name = self.__class__.__name__
         mongua.db[name].save(self.__dict__)
+
+    def delete(self):
+        name = self.__class__.__name__
+        query = {
+            'id': self.id,
+        }
+        values = {
+            'deleted': True
+        }
+        mongua.db[name].update_one(query, values)
