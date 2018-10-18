@@ -67,8 +67,8 @@ class Mongua(object):
         return cls.find_one(**kwargs) is not None
 
     @classmethod
-    def all(cls):
-        return cls._find()
+    def all(cls, **kwargs):
+        return cls._find(**kwargs)
 
     @classmethod
     def upsert(cls, query_form, update_form, hard=False):
@@ -95,6 +95,7 @@ class Mongua(object):
         # TODO 过滤掉被删除的元素
         # kwargs['deleted'] = False
         flag_sort = '__sort'
+        print('kwargs', kwargs)
         sort = kwargs.pop(flag_sort, None)
         ds = mongua.db[name].find(kwargs)
         if sort is not None:
@@ -121,10 +122,6 @@ class Mongua(object):
                 setattr(m, k, v)
         setattr(m, '_id', bson['_id'])
         # 这一句必不可少，否则 bson 生成一个新的_id
-        # FIXME, 因为现在的数据库里面未必有 type
-        # 所以在这里强行加上
-        # 以后洗掉db的数据后应该删掉这一句
-        m.type = cls.__name__.lower()
         return m
 
     @classmethod
