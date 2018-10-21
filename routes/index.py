@@ -39,3 +39,21 @@ def register():
             return jsonify({'type': '2', "msg": "系统故障，注册失败"})
     else:
         return jsonify({"type": '1', "msg": "该名字已经有人注册,请重新选择名字"})
+
+
+@main.route('/logout', methods=["GET"])
+def logout():
+    if session.get('user_id',None) is None:
+        return jsonify({'type': 0, 'msg': 'logout'})
+    else:
+        session.pop('user_id')
+        return jsonify({'type': 0, 'msg': 'logout'})
+
+
+@main.route('/login_state')
+def login_state():
+    ck = session.get('user_id', None)
+    if ck is not None:
+        return jsonify({'type': 0, 'msg': '已登录'})
+    else:
+        return jsonify({'type': 1, 'msg': '未登录'})

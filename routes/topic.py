@@ -17,9 +17,8 @@ main = Blueprint('topic', __name__)
 
 @main.route('/')
 def index():
-    ms = Topic.all()
+    ms = Topic.get_all()
     o = [obj_from_model(model) for model in ms]
-    print(o)
     return jsonify(o)
 
 
@@ -31,11 +30,11 @@ def detail():
         topicDetail = obj_from_model(m)
     else:
         topicDetail = {}
-    rs = Reply.all(topic_id=id)
+    rs = Reply.user_reply(topic_id=id)
     if rs is not None:
         replys = [obj_from_model(r) for r in rs]
     else:
-        replys = {}
+        replys = []
 
     res = {
         "topicDetail": topicDetail,
